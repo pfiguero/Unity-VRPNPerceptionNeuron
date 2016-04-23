@@ -369,13 +369,20 @@ public class VRPNAnimatorDriver : MonoBehaviour {
 
             // spine
             SetRotation(animator, HumanBodyBones.Spine, objs[(int)NeuronBones.Spine].transform);
-            
-            vectorTr.x = objs[(int)NeuronBones.Spine1].transform.position.x + objs[(int)NeuronBones.Spine2].transform.position.x + objs[(int)NeuronBones.Spine3].transform.position.x;
-            vectorTr.y = objs[(int)NeuronBones.Spine1].transform.position.y + objs[(int)NeuronBones.Spine2].transform.position.y + objs[(int)NeuronBones.Spine3].transform.position.y;
-            vectorTr.z = objs[(int)NeuronBones.Spine1].transform.position.z + objs[(int)NeuronBones.Spine2].transform.position.z + objs[(int)NeuronBones.Spine3].transform.position.z;
-            tempTr.position = vectorTr;
-            //SetRotation(animator, HumanBodyBones.Chest, objs[(int)NeuronBones.Spine1].transform.rotation * objs[(int)NeuronBones.Spine2].transform.rotation * objs[(int)NeuronBones.Spine3].transform.rotation);
-            SetRotation(animator, HumanBodyBones.Chest, tempTr);
+
+            if (!remoteDisplacements)
+            { 
+                vectorTr.x = objs[(int)NeuronBones.Spine1].transform.position.x + objs[(int)NeuronBones.Spine2].transform.position.x + objs[(int)NeuronBones.Spine3].transform.position.x;
+                vectorTr.y = objs[(int)NeuronBones.Spine1].transform.position.y + objs[(int)NeuronBones.Spine2].transform.position.y + objs[(int)NeuronBones.Spine3].transform.position.y;
+                vectorTr.z = objs[(int)NeuronBones.Spine1].transform.position.z + objs[(int)NeuronBones.Spine2].transform.position.z + objs[(int)NeuronBones.Spine3].transform.position.z;
+                tempTr.position = vectorTr;
+                SetRotation(animator, HumanBodyBones.Chest, tempTr);
+            }
+            else
+            {
+                tempTr.rotation = objs[(int)NeuronBones.Spine1].transform.rotation * objs[(int)NeuronBones.Spine2].transform.rotation * objs[(int)NeuronBones.Spine3].transform.rotation;
+                SetRotation(animator, HumanBodyBones.Chest, tempTr);
+            }
 
             SetRotation(animator, HumanBodyBones.Neck, objs[(int)NeuronBones.Neck].transform);
             SetRotation(animator, HumanBodyBones.Head, objs[(int)NeuronBones.Head].transform);
@@ -392,42 +399,70 @@ public class VRPNAnimatorDriver : MonoBehaviour {
             SetRotation(animator, HumanBodyBones.RightThumbIntermediate, objs[(int)NeuronBones.RightHandThumb2].transform);
             SetRotation(animator, HumanBodyBones.RightThumbDistal, objs[(int)NeuronBones.RightHandThumb3].transform);
 
-            vectorTr.x = objs[(int)NeuronBones.RightHandIndex1].transform.position.x + objs[(int)NeuronBones.RightInHandIndex].transform.position.x;
-            vectorTr.y = objs[(int)NeuronBones.RightHandIndex1].transform.position.y + objs[(int)NeuronBones.RightInHandIndex].transform.position.y;
-            vectorTr.z = objs[(int)NeuronBones.RightHandIndex1].transform.position.z + objs[(int)NeuronBones.RightInHandIndex].transform.position.z;
-            tempTr.position = vectorTr;
-            //SetRotation(animator, HumanBodyBones.RightIndexProximal, objs[(int)NeuronBones.RightHandIndex1].transform * objs[(int)NeuronBones.RightInHandIndex].transform);
-            SetRotation(animator, HumanBodyBones.RightIndexProximal, tempTr);
+            if (!remoteDisplacements)
+            {
+                vectorTr.x = objs[(int)NeuronBones.RightHandIndex1].transform.position.x + objs[(int)NeuronBones.RightInHandIndex].transform.position.x;
+                vectorTr.y = objs[(int)NeuronBones.RightHandIndex1].transform.position.y + objs[(int)NeuronBones.RightInHandIndex].transform.position.y;
+                vectorTr.z = objs[(int)NeuronBones.RightHandIndex1].transform.position.z + objs[(int)NeuronBones.RightInHandIndex].transform.position.z;
+                tempTr.position = vectorTr;
+                SetRotation(animator, HumanBodyBones.RightIndexProximal, tempTr);
+            }
+            else
+            {
+                tempTr.rotation = objs[(int)NeuronBones.RightHandIndex1].transform.rotation * objs[(int)NeuronBones.RightInHandIndex].transform.rotation;
+                SetRotation(animator, HumanBodyBones.RightIndexProximal, tempTr);
+            }
 
             SetRotation(animator, HumanBodyBones.RightIndexIntermediate, objs[(int)NeuronBones.RightHandIndex2].transform);
             SetRotation(animator, HumanBodyBones.RightIndexDistal, objs[(int)NeuronBones.RightHandIndex3].transform);
 
-            vectorTr.x = objs[(int)NeuronBones.RightHandMiddle1].transform.position.x + objs[(int)NeuronBones.RightInHandMiddle].transform.position.x;
-            vectorTr.y = objs[(int)NeuronBones.RightHandMiddle1].transform.position.y + objs[(int)NeuronBones.RightInHandMiddle].transform.position.y;
-            vectorTr.z = objs[(int)NeuronBones.RightHandMiddle1].transform.position.z + objs[(int)NeuronBones.RightInHandMiddle].transform.position.z;
-            tempTr.position = vectorTr;
-            //SetRotation(animator, HumanBodyBones.RightMiddleProximal, objs[(int)NeuronBones.RightHandMiddle1].transform * objs[(int)NeuronBones.RightInHandMiddle].transform);
-            SetRotation(animator, HumanBodyBones.RightMiddleProximal, tempTr);
+            if (!remoteDisplacements)
+            {
+                vectorTr.x = objs[(int)NeuronBones.RightHandMiddle1].transform.position.x + objs[(int)NeuronBones.RightInHandMiddle].transform.position.x;
+                vectorTr.y = objs[(int)NeuronBones.RightHandMiddle1].transform.position.y + objs[(int)NeuronBones.RightInHandMiddle].transform.position.y;
+                vectorTr.z = objs[(int)NeuronBones.RightHandMiddle1].transform.position.z + objs[(int)NeuronBones.RightInHandMiddle].transform.position.z;
+                tempTr.position = vectorTr;
+                SetRotation(animator, HumanBodyBones.RightMiddleProximal, tempTr);
+            }
+            else
+            {
+                tempTr.rotation = objs[(int)NeuronBones.RightHandMiddle1].transform.rotation * objs[(int)NeuronBones.RightInHandMiddle].transform.rotation;
+                SetRotation(animator, HumanBodyBones.RightMiddleProximal, tempTr);
+            }
 
             SetRotation(animator, HumanBodyBones.RightMiddleIntermediate, objs[(int)NeuronBones.RightHandMiddle2].transform);
             SetRotation(animator, HumanBodyBones.RightMiddleDistal, objs[(int)NeuronBones.RightHandMiddle3].transform);
 
-            vectorTr.x = objs[(int)NeuronBones.RightHandRing1].transform.position.x + objs[(int)NeuronBones.RightInHandRing].transform.position.x;
-            vectorTr.y = objs[(int)NeuronBones.RightHandRing1].transform.position.y + objs[(int)NeuronBones.RightInHandRing].transform.position.y;
-            vectorTr.z = objs[(int)NeuronBones.RightHandRing1].transform.position.z + objs[(int)NeuronBones.RightInHandRing].transform.position.z;
-            tempTr.position = vectorTr;
-            //SetRotation(animator, HumanBodyBones.RightRingProximal, objs[(int)NeuronBones.RightHandRing1].transform * objs[(int)NeuronBones.RightInHandRing].transform);
-            SetRotation(animator, HumanBodyBones.RightRingProximal, tempTr);
+            if (!remoteDisplacements)
+            {
+                vectorTr.x = objs[(int)NeuronBones.RightHandRing1].transform.position.x + objs[(int)NeuronBones.RightInHandRing].transform.position.x;
+                vectorTr.y = objs[(int)NeuronBones.RightHandRing1].transform.position.y + objs[(int)NeuronBones.RightInHandRing].transform.position.y;
+                vectorTr.z = objs[(int)NeuronBones.RightHandRing1].transform.position.z + objs[(int)NeuronBones.RightInHandRing].transform.position.z;
+                tempTr.position = vectorTr;
+                SetRotation(animator, HumanBodyBones.RightRingProximal, tempTr);
+            }
+            else
+            {
+                tempTr.rotation = objs[(int)NeuronBones.RightHandRing1].transform.rotation * objs[(int)NeuronBones.RightInHandRing].transform.rotation;
+                SetRotation(animator, HumanBodyBones.RightRingProximal, tempTr);
+            }
 
             SetRotation(animator, HumanBodyBones.RightRingIntermediate, objs[(int)NeuronBones.RightHandRing2].transform);
             SetRotation(animator, HumanBodyBones.RightRingDistal, objs[(int)NeuronBones.RightHandRing3].transform);
 
-            vectorTr.x = objs[(int)NeuronBones.RightHandPinky1].transform.position.x + objs[(int)NeuronBones.RightInHandPinky].transform.position.x;
-            vectorTr.y = objs[(int)NeuronBones.RightHandPinky1].transform.position.y + objs[(int)NeuronBones.RightInHandPinky].transform.position.y;
-            vectorTr.z = objs[(int)NeuronBones.RightHandPinky1].transform.position.z + objs[(int)NeuronBones.RightInHandPinky].transform.position.z;
-            tempTr.position = vectorTr;
-            //SetRotation(animator, HumanBodyBones.RightLittleProximal, objs[(int)NeuronBones.RightHandPinky1].transform * objs[(int)NeuronBones.RightInHandPinky].transform);
-            SetRotation(animator, HumanBodyBones.RightLittleProximal, tempTr);
+            if (!remoteDisplacements)
+            {
+                vectorTr.x = objs[(int)NeuronBones.RightHandPinky1].transform.position.x + objs[(int)NeuronBones.RightInHandPinky].transform.position.x;
+                vectorTr.y = objs[(int)NeuronBones.RightHandPinky1].transform.position.y + objs[(int)NeuronBones.RightInHandPinky].transform.position.y;
+                vectorTr.z = objs[(int)NeuronBones.RightHandPinky1].transform.position.z + objs[(int)NeuronBones.RightInHandPinky].transform.position.z;
+                tempTr.position = vectorTr;
+                SetRotation(animator, HumanBodyBones.RightLittleProximal, tempTr);
+            }
+            else
+            {
+                tempTr.rotation = objs[(int)NeuronBones.RightHandPinky1].transform.rotation * objs[(int)NeuronBones.RightInHandPinky].transform.rotation;
+                SetRotation(animator, HumanBodyBones.RightLittleProximal, tempTr);
+            }
 
             SetRotation(animator, HumanBodyBones.RightLittleIntermediate, objs[(int)NeuronBones.RightHandPinky2].transform);
             SetRotation(animator, HumanBodyBones.RightLittleDistal, objs[(int)NeuronBones.RightHandPinky3].transform);
