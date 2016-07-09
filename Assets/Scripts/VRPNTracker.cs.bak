@@ -35,10 +35,6 @@ public class VRPNTracker : MonoBehaviour
     public enum ReportType { MOST_RECENT, AVERAGE };
     public ReportType reportType = ReportType.MOST_RECENT;
 
-
-    public enum ThreadingMode {SINGLE_THREADED, MULTI_THREADED};
-    public ThreadingMode threadingMode = ThreadingMode.MULTI_THREADED;
-
     // for making manual adjustments to tracker position
     // (e.g. if there is an offset between tracker location and eyepoint)
     public Vector3 positionAdjustment = Vector3.zero;
@@ -51,9 +47,6 @@ public class VRPNTracker : MonoBehaviour
     // (e.g. if the tracker is mounted in the wrong direction on a rigid object)
     public Vector3 scaleAdjustment = Vector3.one;
     
-	public bool useOculusOrientation = false;
-	public Transform OVROrientationReference;
-
     IntPtr trackerDataPointer;
     TrackerData trackerData;
     static int lastTrackerUpdateFrame = -1;
@@ -76,22 +69,12 @@ public class VRPNTracker : MonoBehaviour
         public int numReports;
     }
     
-    [DllImport("vrpn-wwa")]
+    [DllImport("vrpnclient")]
     static extern IntPtr initializeTracker(string serverName, int sensorNumber);
-    [DllImport("vrpn-wwa")]
-    static extern void endVRPNService();
-
-    // for single threading
-    [DllImport("vrpn-wwa")]
+    [DllImport("vrpnclient")]
+    static extern IntPtr getTrackerData(IntPtr tracker, int sensorNumber);
+    [DllImport("vrpnclient")]
     static extern void updateTrackers();
-
-    // for multithreading
-    [DllImport("vrpn-wwa")]
-    static extern void updateTrackersMultiThreaded();
-    [DllImport("vrpn-wwa")]
-    static extern void lockTrackerData(IntPtr trackerData);
-    [DllImport("vrpn-wwa")]
-    static extern void unlockTrackerData(IntPtr trackerData);
 
     // Use this for initialization
     void Start()
@@ -102,30 +85,14 @@ public class VRPNTracker : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (threadingMode == ThreadingMode.SINGLE_THREADED)
+        // update the trackers only once per frame
+        if(lastTrackerUpdateFrame != Time.frameCount)
         {
-            // update the trackers only once per frame
-            if (lastTrackerUpdateFrame != Time.frameCount)
-            {
-                updateTrackers();
-                lastTrackerUpdateFrame = Time.frameCount;
-            }
-
-            trackerData = (TrackerData)Marshal.PtrToStructure(trackerDataPointer, typeof(TrackerData));
+            updateTrackers();
+            lastTrackerUpdateFrame = Time.frameCount;
         }
-        else
-        {
-            // update the trackers only once per frame
-            if (lastTrackerUpdateFrame != Time.frameCount)
-            {
-                updateTrackersMultiThreaded();
-                lastTrackerUpdateFrame = Time.frameCount;
-            }
 
-            lockTrackerData(trackerDataPointer);
-            trackerData = (TrackerData)Marshal.PtrToStructure(trackerDataPointer, typeof(TrackerData));
-            unlockTrackerData(trackerDataPointer);
-        }
+        trackerData = (TrackerData)Marshal.PtrToStructure(trackerDataPointer, typeof(TrackerData));
 
         if (reportType == ReportType.AVERAGE && trackerData.numReports > 0)
             getAverageReport();
@@ -146,48 +113,53 @@ public class VRPNTracker : MonoBehaviour
             else
                 transform.position = origin.position;
         }
-    }
+        // 
+        // Do something similar if you have a parent
+        // Warning: It overrides previous assignments!
+        /*
+        if (transform.parent != null)
+        {
+            if (trackingMode != TrackingMode.POSITION_ONLY)
+                transform.rotation = transform.parent.rotation * transform.rotation;
+            else
+                transform.rotation = transform.parent.rotation;
 
-    void OnApplicationQuit()
-    {
-        endVRPNService();
+            if (trackingMode != TrackingMode.ORIENTATION_ONLY)
+                transform.position = transform.parent.position + transform.parent.rotation * transform.position;
+            else
+                transform.position = transform.parent.position;
+        }
+         */ 
     }
 
     void getMostRecentReport()
-    {
+    {        
         Quaternion rotation = Quaternion.identity;
         if (trackingMode != TrackingMode.POSITION_ONLY)
         {
-			if (useOculusOrientation) {
-				rotation = OVROrientationReference.rotation;//OVRManager.display.GetEyePose (OVREye.Left).orientation;
-			} else {
-				// convert Phasespace VRPN rotation into Unity coordinate system
-				rotation = transform.rotation;
-				rotation.x = -(float)trackerData.rotation [0];
-				rotation.y = -(float)trackerData.rotation [1];
-				rotation.z = (float)trackerData.rotation [2];
-				rotation.w = (float)trackerData.rotation [3];
-			}
+            
+            // convert Phasespace and Neuron VRPN rotation into Unity coordinate system
+            rotation = transform.rotation;
+            rotation.x = -(float)trackerData.rotation[0];
+            rotation.y = -(float)trackerData.rotation[1];
+            rotation.z = (float)trackerData.rotation[2];
+            rotation.w = (float)trackerData.rotation[3];
+            
             // apply tracker rotation and adjustment
             transform.rotation = rotation * Quaternion.Euler(rotationAdjustment);
         }
 
-		if (trackingMode != TrackingMode.ORIENTATION_ONLY) {
-			// convert Phasespace VRPN position into Unity coordinate system
-			Vector3 position = transform.position;
-			position.x = (float)trackerData.position [0] * scaleAdjustment.x;
-			position.y = (float)trackerData.position [1] * scaleAdjustment.y;
-			position.z = -(float)trackerData.position [2] * scaleAdjustment.z;
+        if (trackingMode != TrackingMode.ORIENTATION_ONLY)
+        {
+            // convert Phasespace and Neuron VRPN position into Unity coordinate system
+            Vector3 position = transform.position;
+            position.x = (float)trackerData.position[0] * scaleAdjustment.x;
+            position.y = (float)trackerData.position[1] * scaleAdjustment.y;
+            position.z = -(float)trackerData.position[2] * scaleAdjustment.z;
 
-			if (useOculusOrientation) {
-				transform.position = position + OVROrientationReference.rotation * positionAdjustment;
-
-			} else {
-				
-				// apply tracker position and adjustment
-				transform.position = position + rotation * positionAdjustment;
-			}
-		}
+            // apply tracker position and adjustment
+            transform.position = position + rotation * positionAdjustment;
+        }
 
         
     }
@@ -197,36 +169,28 @@ public class VRPNTracker : MonoBehaviour
         Quaternion rotation = Quaternion.identity;
         if (trackingMode != TrackingMode.POSITION_ONLY)
         {
-			if (useOculusOrientation) {
-				rotation = OVROrientationReference.rotation;
-			} else {
+            // convert VRPN rotation into Unity coordinate system
+            rotation = transform.rotation;
+            rotation.x = -(float)trackerData.rotationSum[0] / trackerData.numReports;
+            rotation.y = -(float)trackerData.rotationSum[1] / trackerData.numReports;
+            rotation.z = (float)trackerData.rotationSum[2] / trackerData.numReports;
+            rotation.w = (float)trackerData.rotationSum[3] / trackerData.numReports;
 
-				// convert VRPN rotation into Unity coordinate system
-				rotation = transform.rotation;
-				rotation.x = -(float)trackerData.rotationSum [0] / trackerData.numReports;
-				rotation.y = -(float)trackerData.rotationSum [1] / trackerData.numReports;
-				rotation.z = (float)trackerData.rotationSum [2] / trackerData.numReports;
-				rotation.w = (float)trackerData.rotationSum [3] / trackerData.numReports;
-			}
             // apply tracker rotation and adjustment
             transform.rotation = rotation * Quaternion.Euler(rotationAdjustment);
         }
 
-		if (trackingMode != TrackingMode.ORIENTATION_ONLY) {
-			// convert VRPN position into Unity coordinate system
-			Vector3 position = transform.position;
-			position.x = ((float)trackerData.positionSum [0] / trackerData.numReports) * scaleAdjustment.x;
-			position.y = ((float)trackerData.positionSum [1] / trackerData.numReports) * scaleAdjustment.y;
-			position.z = -((float)trackerData.positionSum [2] / trackerData.numReports) * scaleAdjustment.z;
+        if (trackingMode != TrackingMode.ORIENTATION_ONLY)
+        {
+            // convert VRPN position into Unity coordinate system
+            Vector3 position = transform.position;
+            position.x = ((float)trackerData.positionSum[0] / trackerData.numReports) * scaleAdjustment.x;
+            position.y = ((float)trackerData.positionSum[1] / trackerData.numReports) * scaleAdjustment.y;
+            position.z = -((float)trackerData.positionSum[2] / trackerData.numReports) * scaleAdjustment.z;
 
-			if (useOculusOrientation) {
-				transform.position = position + OVROrientationReference.rotation * positionAdjustment;
-			} else {
-				
-				// apply tracker position and adjustment
-				transform.position = position + rotation * positionAdjustment;
-			}
-		}
+            // apply tracker position and adjustment
+            transform.position = position + rotation * positionAdjustment;
+        }
     }
 
     

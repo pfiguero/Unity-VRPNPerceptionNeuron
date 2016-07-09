@@ -16,7 +16,7 @@ public class TestVRPN_PerceptionNeuron : MonoBehaviour {
 
     // Use when working with a Perception Neuron and you want not to send position and a reference point.
     //@HideInInspector
-    public static bool referenceAndDisplacement = false;
+    public static bool referenceAndDisplacement = true;
 
     // Fixed displacements in meters. From NeuronDataReader Runtime API Documentation_D16
     //@HideInInspector

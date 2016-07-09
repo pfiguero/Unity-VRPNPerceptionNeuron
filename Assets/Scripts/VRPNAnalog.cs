@@ -44,10 +44,12 @@ public class VRPNAnalog : MonoBehaviour
         public double state;
     }
 
-    [DllImport("vrpnclient")]
+    [DllImport("vrpn-wwa")]
     static extern IntPtr initializeAnalog(string serverName, int channelNumber);
-    [DllImport("vrpnclient")]
+    [DllImport("vrpn-wwa")]
     static extern void updateAnalogs();
+    [DllImport("vrpn-wwa")]
+    static extern void endVRPNService();
 
     // Use this for initialization
     void Start()
@@ -141,6 +143,11 @@ public class VRPNAnalog : MonoBehaviour
         }
 
         
+    }
+
+    void OnApplicationQuit()
+    {
+        endVRPNService();
     }
 
 }

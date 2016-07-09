@@ -44,11 +44,14 @@ public class VRPNButton : MonoBehaviour
         public bool state;
     }
     
-    [DllImport("vrpnclient")]
+    [DllImport("vrpn-wwa")]
     static extern IntPtr initializeButton(string serverName, int buttonNumber);
-    [DllImport("vrpnclient")]
+    [DllImport("vrpn-wwa")]
     static extern void updateButtons();
+    [DllImport("vrpn-wwa")]
+    static extern void endVRPNService();
 
+	
         // Use this for initialization
     void Start()
     {
@@ -144,5 +147,11 @@ public class VRPNButton : MonoBehaviour
 
         }
     }
+	
+	void OnApplicationQuit()
+    {
+        endVRPNService();
+    }
+
     
 }
