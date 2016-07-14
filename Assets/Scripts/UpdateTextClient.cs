@@ -14,14 +14,10 @@ public class UpdateTextClient : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (origin != null && !origin.isBeenRead())
+        if (origin != null)
         {
             var msg = origin.getLastMessage();
-            /*
-            if (timeText != null && msg.StartsWith("CURTIME "))
-                timeText.text = msg;
-            else
-             */
+            if(msg.Length > 0)
                 dest.text = msg;
         }
 	}

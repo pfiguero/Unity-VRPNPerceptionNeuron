@@ -33,7 +33,6 @@ public class VRPNString : MonoBehaviour
     private IntPtr stringDataPointer;
 
     private String curMsg;
-    private bool hasBeenRead = true;
 
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct StringData
@@ -44,6 +43,8 @@ public class VRPNString : MonoBehaviour
 	
     [DllImport("vrpn-wwa")]
     static extern IntPtr initializeStrings(string serverName);
+    [DllImport("vrpn-wwa")]
+    static extern void markAsRead(IntPtr stringData);
     [DllImport("vrpn-wwa")]
     static extern void endVRPNService();
 
@@ -73,7 +74,6 @@ public class VRPNString : MonoBehaviour
 			
 			StringData sd = (StringData) Marshal.PtrToStructure(stringDataPointer, typeof(StringData));			
             curMsg = (String)Marshal.PtrToStringAnsi(sd.msg);
-            hasBeenRead = false;
 			
 			unlockStringData(stringDataPointer);
 
@@ -85,14 +85,11 @@ public class VRPNString : MonoBehaviour
     }
     public String getLastMessage()
     {
-        hasBeenRead = true;
-        return curMsg;
+        markAsRead(stringDataPointer);
+		String ans = curMsg;
+		curMsg = "";
+        return ans;
     }
-    public bool isBeenRead()
-    {
-        return hasBeenRead;
-    }
-    
 	void OnApplicationQuit()
     {
         endVRPNService();
