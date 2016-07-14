@@ -19,8 +19,6 @@ public class VRPNTextSender : MonoBehaviour
     [DllImport("vrpn-wwa")]
     static extern void vts_sendMsg(string msg);
     [DllImport("vrpn-wwa")]
-    static extern void vts_update();
-    [DllImport("vrpn-wwa")]
     static extern void vts_destroyServer();
 
 
@@ -36,10 +34,25 @@ public class VRPNTextSender : MonoBehaviour
         //Debug.Log("Queue message: " + msg);
     }
 
+    public void pause()
+    {
+        vts_sendMsg("PAUSE");
+    }
+
+    public void play()
+    {
+        vts_sendMsg("CONTINUE");
+    }
+
+    public void replay()
+    {
+        vts_sendMsg("REPLAY");
+    }
+
     // Update is called once per frame
     void Update()
     {
-        vts_update();
+        //vts_update();
 	}
 
 

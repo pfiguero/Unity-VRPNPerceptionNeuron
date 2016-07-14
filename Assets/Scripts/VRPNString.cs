@@ -29,23 +29,35 @@ public class VRPNString : MonoBehaviour
     // This number should be the same as MAX_MSG_LENGTH in C++
     private const int MAX_MSG_LENGTH = 256;
 
-    // Pointer to the string
-    private IntPtr msg;
+    // Pointer to the string data
+    private IntPtr stringDataPointer;
 
     private String curMsg;
     private bool hasBeenRead = true;
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct StringData
+    {
+        public IntPtr msg;
+	}
+
+	
     [DllImport("vrpn-wwa")]
     static extern IntPtr initializeStrings(string serverName);
     [DllImport("vrpn-wwa")]
-    static extern void updateStrings();
-    [DllImport("vrpn-wwa")]
     static extern void endVRPNService();
 
+	// for multithreading
+    [DllImport("vrpn-wwa")]
+    static extern void lockStringData(IntPtr stringData);
+    [DllImport("vrpn-wwa")]
+    static extern void unlockStringData(IntPtr stringData);
+
+	
         // Use this for initialization
     void Start()
     {
-        msg = initializeStrings(device + "@" + server);
+        stringDataPointer = initializeStrings(device + "@" + server);
     }
 
     // Update is called once per frame
@@ -54,14 +66,19 @@ public class VRPNString : MonoBehaviour
         // update the trackers only once per frame
         if (lastStringUpdateFrame != Time.frameCount)
         {
-            updateStrings();
-            // update the local string
+            // updateStrings();
+            // inside the tracker multithreaded loop
 
-            curMsg = (String)Marshal.PtrToStringAnsi(msg);
-
+			lockStringData(stringDataPointer);
+			
+			StringData sd = (StringData) Marshal.PtrToStructure(stringDataPointer, typeof(StringData));			
+            curMsg = (String)Marshal.PtrToStringAnsi(sd.msg);
             hasBeenRead = false;
+			
+			unlockStringData(stringDataPointer);
 
             lastStringUpdateFrame = Time.frameCount;
+
         }
         // It is assumed the data is already in the strData
 
